@@ -38,7 +38,20 @@ public class ComplexLinkLabel extends JGoLinkLabel {
         Instance instance = cLink.getInstance();
         Cls cls = instance.getDirectType();
         Slot slot = cls.getBrowserSlotPattern().getFirstSlot();
-        instance.setOwnSlotValue(slot, getText());
+        if (slot.getValueType() == ValueType.STRING) {
+          instance.setOwnSlotValue(slot, getText());
+        }
+        if (slot.getValueType() == ValueType.INTEGER) {
+          try {
+            instance.setOwnSlotValue(slot, Integer.parseInt(getText()));
+          }
+          catch (NumberFormatException exception) {
+        	Object slotValue = instance.getOwnSlotValue(slot);
+        	if (slotValue != null) {
+        		setText(slotValue.toString());
+        	}
+          }
+        }
 
         // Call super.doEndEdit so that the JTextComponent will go away.
         super.doEndEdit();
@@ -67,7 +80,8 @@ public class ComplexLinkLabel extends JGoLinkLabel {
         // Disallow in-place text editing if the display slot is not of type
         // String.
         Slot browserSlot = pattern.getFirstSlot();
-        if (browserSlot.getValueType() != ValueType.STRING) {
+        if (browserSlot.getValueType() != ValueType.STRING &&
+            browserSlot.getValueType() != ValueType.INTEGER) {
             setEditable(false);
             return;
         }
